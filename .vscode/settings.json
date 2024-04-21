@@ -1,0 +1,7 @@
+{
+    "prettier.useTabs": true,
+    "prettier.trailingComma": "all",
+    "editor.formatOnSave": true,
+    "editor.inlayHints.padding": true,
+    "workbench.activityBar.location": "default"
+}
