@@ -6,11 +6,21 @@ const sendToken = require("../utils/jwt-token.js");
 const sendEmail = require("../utils/send-email.js");
 const crypto = require("crypto");
 const Roles = require("../utils/enums/roles.js");
+const cloudinary = require("cloudinary");
 
 // Register the user
 
 exports.registerUser = catchAsyncError(async (req, res, next) => {
-	const { name, email, password, role } = req.body;
+	const myCloud = await cloudinary.v2.uploader.upload(req.body.avatar, {
+		folder: "avatars",
+		width: 150,
+		crop: "scale",
+	});
+	const { name, email, password, reEnteredPassword, role } = req.body;
+
+	if (password != reEnteredPassword) {
+		return next(new ErrorHandler("Passwords did not matched", 400));
+	}
 	const user = await User.create({
 		name,
 		email,
@@ -18,7 +28,7 @@ exports.registerUser = catchAsyncError(async (req, res, next) => {
 		role,
 		avatar: {
 			public_id: "this is sample Id",
-			url: "profilePicUrl",
+			url: myCloud.secure_url,
 		},
 	});
 
