@@ -12,7 +12,7 @@ const cloudinary = require("cloudinary");
 
 exports.registerUser = catchAsyncError(async (req, res, next) => {
 	const myCloud = await cloudinary.v2.uploader.upload(req.body.avatar, {
-		folder: "avatars",
+		folder: "artGaloreAvatars",
 		width: 150,
 		crop: "scale",
 	});
@@ -170,13 +170,22 @@ exports.updatePassword = catchAsyncError(async (req, res, next) => {
 });
 
 exports.updateUserProfile = catchAsyncError(async (req, res, next) => {
+	const myCloud = await cloudinary.v2.uploader.upload(req.body.avatar, {
+		folder: "artGaloreAvatars",
+		width: 150,
+		crop: "scale",
+	});
 	const newUserData = {
 		name: req.body.name,
 		email: req.body.email,
 		role: req.body.role,
+		description: req.body.description,
+		avatar: {
+			public_id: "this is sample Id",
+			url: myCloud.secure_url,
+		},
 	};
 	// we will add cloudinary later to update the avatar
-
 	const user = await User.findByIdAndUpdate(req.params.id, newUserData, {
 		new: true,
 		runValidators: true,

@@ -31,16 +31,14 @@ router.route("/password/forgot").post(forgotPassword);
 router.route("/password/reset/:token").put(resetPassword);
 router.route("/profile").get(isAuthenticatedUser, getUserDetails);
 router.route("/password/update").put(isAuthenticatedUser, updatePassword);
-router.route("/profile").put(isAuthenticatedUser, updateUserProfile);
-router
-	.route("/artists")
-	.get(isAuthenticatedUser, authorizeRole(Roles.ADMIN), getArtists);
+router.route("/profile/:id").put(isAuthenticatedUser, updateUserProfile);
+router.route("/artists").get(getArtists);
 router
 	.route("/spectators")
 	.get(isAuthenticatedUser, authorizeRole(Roles.ADMIN), getSpectators);
 router
 	.route("/user/:id")
-	.get(isAuthenticatedUser, authorizeRole(Roles.ADMIN), getUser)
+	.get(getUser)
 	.delete(isAuthenticatedUser, authorizeRole(Roles.ADMIN), deleteUser);
 router.route("/user/follow").put(isAuthenticatedUser, followUser);
 router.route("/user/unfollow").put(isAuthenticatedUser, unfollowUser);
