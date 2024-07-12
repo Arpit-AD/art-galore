@@ -6,6 +6,10 @@ const productSchema = mongoose.Schema({
 		type: String,
 		required: [true, "Please enter the product name"],
 	},
+	majorColor: {
+		type: String,
+		required: [true, "Please provide a major color present in your art."],
+	},
 	description: {
 		type: String,
 		required: [true, "Please enter the product description"],

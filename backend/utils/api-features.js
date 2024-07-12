@@ -29,7 +29,6 @@ class ApiFeatures {
 		this.query = this.query.find(JSON.parse(queryStr));
 		return this;
 	}
-
 	pagination(resultPerPage) {
 		const currentPage = this.queryStr.page || 1;
 		const skipPages = resultPerPage * (currentPage - 1);

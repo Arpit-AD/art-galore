@@ -58,8 +58,7 @@ exports.getProductDetails = AsyncErrors(async (req, res, next) => {
 	if (!_product) {
 		return next(new ErrorHandler("Product Not Found", 404));
 	}
-
-	return res.status(500).json({
+	return res.status(200).json({
 		success: true,
 		_product,
 	});
