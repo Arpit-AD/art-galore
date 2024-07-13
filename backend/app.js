@@ -1,10 +1,12 @@
 const express = require("express");
+const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const app = express();
 const bodyParser = require("body-parser");
 const fileupload = require("express-fileupload");
 
 app.use(express.json({ limit: "50mb" }));
+app.use(cors());
 app.use(cookieParser());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(fileupload());
