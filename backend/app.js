@@ -6,7 +6,7 @@ const bodyParser = require("body-parser");
 const fileupload = require("express-fileupload");
 
 app.use(express.json({ limit: "50mb" }));
-app.use(cors({ origin: process.env.FRONTEND_URI, credentials: true }));
+app.use(cors({ credentials: true }));
 app.use(cookieParser());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(fileupload());
