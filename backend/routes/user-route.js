@@ -16,6 +16,8 @@ const {
 	unfollowUser,
 	getUserFollowers,
 	getUserFollowing,
+	addToWishlist,
+	removeFromWishlist,
 } = require("../controllers/user-controller");
 const router = express.Router();
 const {
@@ -43,6 +45,9 @@ router
 router.route("/user/follow").put(isAuthenticatedUser, followUser);
 router.route("/user/unfollow").put(isAuthenticatedUser, unfollowUser);
 router.route("/user/followers/:id").get(isAuthenticatedUser, getUserFollowers);
-router.route("/user/following/:id").get(isAuthenticatedUser, getUserFollowing);
+router.route("/user/wishlist/add").put(isAuthenticatedUser, addToWishlist);
+router
+	.route("/user/wishlist/remove")
+	.put(isAuthenticatedUser, removeFromWishlist);
 
 module.exports = router;

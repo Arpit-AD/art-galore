@@ -1,6 +1,7 @@
 const ErrorHandler = require("../utils/error-handler.js");
 const ApiFeatures = require("../utils/api-features.js");
 const User = require("../models/userModel.js");
+const Product = require("../models/productModel.js");
 const catchAsyncError = require("../middleware/catch-async-error.js");
 const sendToken = require("../utils/jwt-token.js");
 const sendEmail = require("../utils/send-email.js");
@@ -10,12 +11,30 @@ const cloudinary = require("cloudinary");
 
 // Register the user
 
+const validateImage = (image) => {
+	const allowedMimeTypes = [
+		"image/jpeg",
+		"image/png",
+		"image/gif",
+		"image/webp",
+	];
+	const imageType = image.split(";")[0].split(":")[1];
+	return allowedMimeTypes.includes(imageType);
+};
+
 exports.registerUser = catchAsyncError(async (req, res, next) => {
-	const myCloud = await cloudinary.v2.uploader.upload(req.body.avatar, {
-		folder: "artGaloreAvatars",
-		width: 150,
-		crop: "scale",
-	});
+	let profile_url =
+		"https://res.cloudinary.com/dkb4cxn9b/image/upload/v1721113851/artGaloreAvatars/no_profile.png";
+	if (req.body.avatar) {
+		if (validateImage(req.body.avatar)) {
+			const myCloud = await cloudinary.v2.uploader.upload(req.body.avatar, {
+				folder: "artGaloreAvatars",
+				width: 150,
+				crop: "scale",
+			});
+			profile_url = myCloud.secure_url;
+		}
+	}
 	const { name, email, password, reEnteredPassword, role } = req.body;
 
 	if (password != reEnteredPassword) {
@@ -28,7 +47,7 @@ exports.registerUser = catchAsyncError(async (req, res, next) => {
 		role,
 		avatar: {
 			public_id: "this is sample Id",
-			url: myCloud.secure_url,
+			url: profile_url,
 		},
 	});
 
@@ -247,38 +266,48 @@ exports.deleteUser = catchAsyncError(async (req, res, next) => {
 
 // follow user
 exports.followUser = catchAsyncError(async (req, res, next) => {
-	const { userId, followUserId } = req.body;
+	const { followUserId } = req.body;
+	const userId = req.user.id;
 
 	const followUser = await User.findById(followUserId);
 	if (!followUser) {
 		return next(new ErrorHandler("User not found to follow", 404));
 	}
-	await User.findByIdAndUpdate(userId, {
-		$addToSet: { following: followUserId },
-	});
+	const user = await User.findByIdAndUpdate(
+		userId,
+		{
+			$addToSet: { following: followUserId },
+		},
+		{ new: true },
+	);
 	await User.findByIdAndUpdate(followUserId, {
 		$addToSet: { followers: userId },
 	});
 
 	res
 		.status(200)
-		.json({ success: true, message: "User followed successfully" });
+		.json({ success: true, message: "User followed successfully", user });
 });
 
 //unfollow user
 
 exports.unfollowUser = catchAsyncError(async (req, res, next) => {
 	try {
-		const { userId, unfollowUserId } = req.body;
+		const { unfollowUserId } = req.body;
+		const userId = req.user.id;
 
-		await User.findByIdAndUpdate(userId, {
-			$pull: { following: unfollowUserId },
-		});
+		const user = await User.findByIdAndUpdate(
+			userId,
+			{
+				$pull: { following: unfollowUserId },
+			},
+			{ new: true },
+		);
 		await User.findByIdAndUpdate(unfollowUserId, {
 			$pull: { followers: userId },
 		});
 
-		res.status(200).json({ message: "User unfollowed successfully" });
+		res.status(200).json({ message: "User unfollowed successfully", user });
 	} catch (error) {
 		return next(new ErrorHandler("Error unfollowing user", 500));
 	}
@@ -308,3 +337,49 @@ exports.getUserFollowing = async (req, res, next) => {
 		return next(new ErrorHandler("Error fetching user following list", 500));
 	}
 };
+
+// add to wishlist
+exports.addToWishlist = catchAsyncError(async (req, res, next) => {
+	const { productId } = req.body;
+	const userId = req.user.id;
+	const product = await Product.findById(productId);
+	if (!product) {
+		return next(new ErrorHandler("Product not found", 404));
+	}
+	const user = await User.findByIdAndUpdate(
+		userId,
+		{
+			$addToSet: { wishlist: productId },
+		},
+		{ new: true },
+	);
+
+	res.status(200).json({
+		success: true,
+		message: "Product added to wishlist successfully",
+		user: user,
+	});
+});
+
+// remove from wishlist
+exports.removeFromWishlist = catchAsyncError(async (req, res, next) => {
+	const { productId } = req.body;
+	const userId = req.user.id;
+	const product = await Product.findById(productId);
+	if (!product) {
+		return next(new ErrorHandler("Product not found", 404));
+	}
+	const user = await User.findByIdAndUpdate(
+		userId,
+		{
+			$pull: { wishlist: productId },
+		},
+		{ new: true },
+	);
+
+	res.status(200).json({
+		success: true,
+		message: "Product removed from wishlist successfully",
+		user,
+	});
+});
