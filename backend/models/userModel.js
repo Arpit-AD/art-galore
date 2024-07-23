@@ -5,9 +5,6 @@ const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 const Roles = require("../utils/enums/roles");
 
-//// adforarpit76@gmail.com  arpit@72
-//// ekjotkaurk13@gmail.com  ekjot@72
-
 const userSchema = new mongoose.Schema({
 	name: {
 		type: String,
@@ -58,6 +55,12 @@ const userSchema = new mongoose.Schema({
 		{
 			type: mongoose.Schema.Types.ObjectId,
 			ref: "User",
+		},
+	],
+	wishlist: [
+		{
+			type: mongoose.Schema.Types.ObjectId,
+			ref: "Product",
 		},
 	],
 });
