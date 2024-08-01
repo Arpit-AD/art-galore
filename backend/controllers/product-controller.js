@@ -105,10 +105,10 @@ exports.createProductReview = catchAsyncError(async (req, res, next) => {
 	const _review = {
 		user: req.user._id,
 		name: req.user.name,
+		avatar: req.user.avatar,
 		rating: Number(rating),
 		comment,
 	};
-
 	const product = await Product.findById(productId);
 	const isReviewed = product.reviews.find((review) => {
 		return review.user?.toString() === req.user._id?.toString();
@@ -119,7 +119,7 @@ exports.createProductReview = catchAsyncError(async (req, res, next) => {
 				review.user?.toString() === req.user._id?.toString() &&
 				(review.rating != Number(rating) || review.comment != comment)
 			) {
-				review.rating = rating;
+				review.rating = Number(rating);
 				review.comment = comment;
 			}
 		});
